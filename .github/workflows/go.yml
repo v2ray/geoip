@@ -2,7 +2,7 @@ name: Build geoip.dat
 
 on: 
   schedule:
-    - cron: "0 1 * * *"
+    - cron: "0 1 */4 * *"
   push:
     branches:
       - master
