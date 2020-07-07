@@ -14,9 +14,9 @@ import (
 	"strings"
 
 	"github.com/golang/protobuf/proto"
-	"v2ray.com/core/app/router"
-	"v2ray.com/core/common"
-	"v2ray.com/core/infra/conf"
+	"github.com/v2fly/v2ray-core/app/router"
+	"github.com/v2fly/v2ray-core/common"
+	"github.com/v2fly/v2ray-core/infra/conf"
 )
 
 var (
