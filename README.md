@@ -1,3 +1,7 @@
+# Move To https://github.com/v2fly/geoip
+
+***
+
 # GeoIP List for V2Ray
 
 Automatically weekly release of geoip.dat for V2Ray.
