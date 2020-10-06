@@ -1,0 +1,66 @@
+name: Sync geoip.dat with v2fly
+on:
+  schedule:
+    - cron: "0 1 * * 4"
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Compare latest tags and set variables
+        run: |
+          upstreamLatestTag=$(curl -sSL --connect-timeout 5 -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/v2fly/geoip/releases/latest | grep "tag_name" | cut -d\" -f4)
+          thisLatestTag=$(curl -sSL --connect-timeout 5 -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/v2ray/geoip/releases/latest | grep "tag_name" | cut -d\" -f4)
+          if [[ $upstreamLatestTag != $thisLatestTag ]]; then
+            echo "NeedToSync=true" >> $GITHUB_ENV
+          fi
+          echo "RELEASE_NAME=$upstreamLatestTag" >> $GITHUB_ENV
+          echo "TAG_NAME=$upstreamLatestTag" >> $GITHUB_ENV
+        shell: bash
+
+      - name: Checkout "release" branch of repo "v2fly/geoip"
+        if: ${{ env.NeedToSync }}
+        uses: actions/checkout@v2
+        with:
+          repository: v2fly/geoip
+          ref: release
+
+      - name: Git push assets to "release" branch
+        if: ${{ env.NeedToSync }}
+        run: |
+          git remote add v2ray "https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}"
+          git push -f v2ray release:release
+
+      - name: Create a release
+        id: create_release
+        if: ${{ env.NeedToSync }}
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.TAG_NAME }}
+          release_name: ${{ env.RELEASE_NAME }}
+          body: "Sync with https://github.com/v2fly/geoip/releases/tag/${{ env.TAG_NAME }}"
+          draft: false
+          prerelease: false
+
+      - name: Upload dlc.dat
+        if: ${{ env.NeedToSync }}
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dlc.dat
+          asset_name: dlc.dat
+          asset_content_type: application/octet-stream
+
+      - name: Upload dlc.dat.sha256sum
+        if: ${{ env.NeedToSync }}
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dlc.dat.sha256sum
+          asset_name: dlc.dat.sha256sum
+          asset_content_type: text/plain
