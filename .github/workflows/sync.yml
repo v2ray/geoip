@@ -23,6 +23,7 @@ jobs:
         with:
           repository: v2fly/geoip
           ref: release
+          fetch-depth: 0
 
       - name: Git push assets to "release" branch
         if: ${{ env.NeedToSync }}
