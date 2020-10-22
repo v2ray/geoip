@@ -2,6 +2,11 @@ name: Sync geoip.dat with v2fly
 on:
   schedule:
     - cron: "0 1 * * 4"
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - "**/README.md"
 jobs:
   sync:
     runs-on: ubuntu-latest
@@ -44,24 +49,24 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: Upload dlc.dat
+      - name: Upload geoip.dat
         if: ${{ env.NeedToSync }}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./dlc.dat
-          asset_name: dlc.dat
+          asset_path: ./geoip.dat
+          asset_name: geoip.dat
           asset_content_type: application/octet-stream
 
-      - name: Upload dlc.dat.sha256sum
+      - name: Upload geoip.dat.sha256sum
         if: ${{ env.NeedToSync }}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./dlc.dat.sha256sum
-          asset_name: dlc.dat.sha256sum
+          asset_path: ./geoip.dat.sha256sum
+          asset_name: geoip.dat.sha256sum
           asset_content_type: text/plain
